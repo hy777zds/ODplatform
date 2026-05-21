@@ -1,3 +1,15 @@
+# pyproject.toml(顶层)
+# =============================================================================
+# ODPlatform Workspace 顶层配置 —— 工具配置容器 + 元包(空包,仅 dev 依赖)
+# =============================================================================
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = []
+
 [project]
 name = "odplatform-workspace"
 version = "0.1.0"
