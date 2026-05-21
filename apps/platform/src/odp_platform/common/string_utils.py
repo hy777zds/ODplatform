@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-# @FileName  : string_utils.py
-# @Author    : 雨霓同学 (ODPlatform team)
-# @Project   : ODPlatform
-# @Function  : 字符串工具——CJK 感知的对齐 / 表格格式化
-
-
 def get_display_width(text: str) -> int:
     """
     计算字符串的实际显示宽度。
