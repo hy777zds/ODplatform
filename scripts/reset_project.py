@@ -14,9 +14,11 @@ import stat
 import sys
 from pathlib import Path
 
+import subprocess
+
 from odp_platform.common.paths import (
     ROOT_DIR,
-    LOGGING_DIR,            # ← 注意:这版 logger 还是写在这里,撞墙⑤会改
+    META_LOGGING_DIR,
     RAW_DATA_DIR,
     PRETRAINED_MODELS_DIR,
     get_dirs_to_reset,
@@ -27,7 +29,7 @@ from odp_platform.common.string_utils import format_table_row, format_table_sepa
 
 
 logger = get_logger(
-    base_path=LOGGING_DIR,        # ← 自指 bug 在这里埋下,撞墙⑤会修
+    base_path=META_LOGGING_DIR,
     log_type="reset_project",
     temp_log=False,
 )
@@ -195,6 +197,19 @@ def _delete_one(
         return str(e)
 
 
+def _restore_git_tracked(deleted_path: Path) -> None:
+    """删除目录后恢复其中被 git 追踪的文件(如 README.md/.gitkeep)。"""
+    try:
+        subprocess.run(
+            ["git", "checkout", "HEAD", "--", str(deleted_path)],
+            cwd=str(ROOT_DIR),
+            capture_output=True,
+            timeout=30,
+        )
+    except Exception:
+        pass
+
+
 def _execute_delete(deletable: list[tuple[Path, int, int]]) -> None:
     total = len(deletable)
     success: list[Path] = []
@@ -206,6 +221,10 @@ def _execute_delete(deletable: list[tuple[Path, int, int]]) -> None:
             success.append(path)
         else:
             failed.append((path, reason))
+
+    # 恢复被误删的 git 追踪文件(如 README.md)
+    for p in success:
+        _restore_git_tracked(p)
 
     logger.info("=" * LINE_WIDTH)
     if failed:
