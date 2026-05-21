@@ -35,9 +35,11 @@ dependencies = [
     "colorlog>=6.7.0",
     "psutil>=5.9.0",
     "torch>=2.0.0",
-    "ultralytics>=8.0.0",
+    "ultralytics>=8.0,<9.0",
     "pyyaml>=6.0",
     "pydantic>=2.0",
+    "scikit-learn>=1.3,<2.0",
+    "pillow",
 ]
 
 [project.optional-dependencies]
@@ -55,6 +57,7 @@ dev = [
 [project.scripts]
 odp-init  = "odp_platform.cli.init_project:initialize_project"
 odp-reset = "odp_platform.cli.reset_project:main"
+odp-transform  = "odp_platform.cli.transform_data:main"
 
 
 # =============================================================================
