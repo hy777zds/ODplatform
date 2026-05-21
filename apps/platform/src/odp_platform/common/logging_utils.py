@@ -1,16 +1,3 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-# @FileName  : logging_utils.py
-# @Author    : 雨霓同学 (ODPlatform team)
-# @Project   : ODPlatform
-# @Function  : 高度可配置的日志工具,创建独立日志文件 + 彩色控制台输出
-#
-# 设计哲学:
-#   - 业务模块: 顶部一行 logger = logging.getLogger(__name__), 不配 handler
-#   - 本模块: 提供 get_logger(), 把 handler 挂到根 logger "odp_platform" 上
-#   - CLI 入口: 调用一次 get_logger() 完成 handler 装配,
-#               之后所有 getLogger(__name__) 通过冒泡机制自动继承
-
 import logging
 import sys
 import platform
@@ -50,10 +37,7 @@ def get_logger(
         log_level: 日志级别(默认 INFO)
         temp_log: 是否标记为临时日志(文件名前缀变成 "temp")
         encoding: 文件编码(默认 utf-8)
-        logger_name: 要配置的 logger 名 (默认是根 logger "odp_platform";
-                     特殊场景可以传别的名字配出独立 logger, 比如 D2.5 的
-                     reset_project 审计日志会传 "odp_platform.audit.reset"
-                     形成隔离子树)
+        logger_name: 要配置的 logger 名 (默认是根 logger "odp_platform")
 
     Returns:
         配置好的 logging.Logger 实例
@@ -65,9 +49,6 @@ def get_logger(
     # 幂等保护: getLogger 是 singleton——同一个 logger_name 多次调用拿到同一对象。
     # 第一次调用配置好 handler 后, 后续调用直接返回, 避免重复挂多份 handler
     # (重复挂 handler 会导致同一条日志被打印 N 遍)。
-    #
-    # 副作用: 第二次调用即使传了不同的 log_level / temp_log 也不再生效——这是有意为之。
-    # 整个进程只配置一次日志, 由 CLI 入口在最早时机调用一次完成。
     if logger.handlers:
         return logger
 
@@ -98,7 +79,6 @@ def get_logger(
     # 4. 文件 Handler(完整格式, 含 logger 名)
     # ============================================================
     # %(name)s 字段会输出 logger 名, 比如 "odp_platform.cli.init_project"
-    # 这是 getLogger(__name__) 设计带来的福利——一眼看出日志来源模块
     file_formatter = logging.Formatter(
         fmt="%(asctime)s - %(name)s - %(levelname)-8s - "
             "%(filename)s:%(lineno)d - %(funcName)s - %(message)s",
@@ -160,8 +140,6 @@ if __name__ == "__main__":
     )
 
     # 第二步: 业务代码就这样写——拿一个 __name__ logger, 直接发声
-    # 注意: 这里 __name__ 是 "__main__"(因为直接跑这个文件),
-    # 实际项目里它会是 "odp_platform.common.logging_utils"
     test_logger = logging.getLogger(__name__)
     test_logger.debug("这是 DEBUG (默认 INFO 级别看不到)")
     test_logger.info("这是 INFO")
